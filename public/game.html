@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Речной квиз</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+
+  <section class="screen active" id="screen-lobby">
+    <h2 class="theme-title" id="lobbyTheme"></h2>
+    <div class="code-display">
+      <div class="code-label">Код комнаты</div>
+      <div class="code-value" id="roomCode">-----</div>
+      <button class="btn-copy" id="btnCopy">Скопировать</button>
+    </div>
+
+    <h3>Игроки <span id="playerCount"></span></h3>
+    <div class="players-list" id="playersList"></div>
+
+    <button class="btn-primary" id="btnReady">Я готов</button>
+    <p class="hint" id="lobbyHint">Ждём всех. Минимум 2 игрока.</p>
+  </section>
+
+  <section class="screen" id="screen-question">
+    <div class="top-bar">
+      <span id="qProgress">Вопрос 1 / 10</span>
+      <span class="timer" id="timer">20</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+
+    <h2 class="question-text" id="questionText"></h2>
+    <div class="answers" id="answersBox"></div>
+
+    <p class="hint" id="answerStatus">Выберите ответ</p>
+    <div class="scoreboard" id="scoreboardQ"></div>
+  </section>
+
+  <section class="screen" id="screen-reveal">
+    <div class="top-bar">
+      <span id="qProgressR">Вопрос 1 / 10</span>
+    </div>
+    <h2 class="question-text" id="questionTextR"></h2>
+    <div class="answers" id="answersBoxR"></div>
+
+    <div class="scoreboard" id="scoreboardR"></div>
+
+    <button class="btn-primary" id="btnNext">Далее</button>
+    <p class="hint" id="nextHint">Ждём остальных…</p>
+  </section>
+
+  <section class="screen" id="screen-results">
+    <h2>🏁 Финиш</h2>
+    <div class="winner-box" id="winnerBox"></div>
+    <div class="final-list" id="finalList"></div>
+    <button class="btn-primary" onclick="location.href='index.html'">Новая игра</button>
+  </section>
+
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script src="client.js"></script>
+</body>
+</html>

@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Речной квиз — Вход</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="container">
+  <header class="logo">
+    <span class="anchor">⚓</span>
+    <h1>Речной квиз</h1>
+    <p class="subtitle">Грузоперевозки по рекам и каналам</p>
+  </header>
+
+  <div class="tabs">
+    <button class="tab active" data-tab="create">Создать</button>
+    <button class="tab" data-tab="join">Присоединиться</button>
+  </div>
+
+  <div class="panel active" id="panel-create">
+    <label>Ваше имя</label>
+    <input type="text" id="createName" maxlength="20" placeholder="Капитан">
+
+    <label>Тема</label>
+    <div id="themes" class="themes">Загрузка…</div>
+
+    <button class="btn-primary" id="btnCreate">Создать комнату</button>
+    <div class="error" id="createError"></div>
+  </div>
+
+  <div class="panel" id="panel-join">
+    <label>Ваше имя</label>
+    <input type="text" id="joinName" maxlength="20" placeholder="Матрос">
+
+    <label>Код комнаты</label>
+    <input type="text" id="joinCode" maxlength="3" placeholder="123" inputmode="numeric"
+           style="letter-spacing:0.4em; text-align:center; font-size:1.6rem;">
+
+    <button class="btn-primary" id="btnJoin">Войти</button>
+    <div class="error" id="joinError"></div>
+  </div>
+</div>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+const socket = io();
+
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.onclick = () => {
+    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+    tab.classList.add('active');
+    document.getElementById('panel-' + tab.dataset.tab).classList.add('active');
+  };
+});
+
+let selectedTheme = null;
+fetch('/api/themes').then(r => r.json()).then(themes => {
+  const box = document.getElementById('themes');
+  box.innerHTML = '';
+  themes.forEach(t => {
+    const el = document.createElement('div');
+    el.className = 'theme-card';
+    el.innerHTML = `<div class="theme-name">${t.name}</div>
+                    <div class="theme-meta">${t.roundsCount} раунд(ов)</div>`;
+    el.onclick = () => {
+      document.querySelectorAll('.theme-card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+      selectedTheme = t.id;
+    };
+    box.appendChild(el);
+  });
+});
+
+document.getElementById('btnCreate').onclick = () => {
+  const name = document.getElementById('createName').value.trim();
+  const err = document.getElementById('createError');
+  err.textContent = '';
+  if (!name) return err.textContent = 'Введите имя';
+  if (!selectedTheme) return err.textContent = 'Выберите тему';
+
+  socket.emit('createRoom', { name, themeId: selectedTheme }, (res) => {
+    if (res.error) return err.textContent = res.error;
+    sessionStorage.setItem('selfId', res.selfId);
+    sessionStorage.setItem('code', res.room.code);
+    location.href = 'game.html';
+  });
+};
+
+document.getElementById('btnJoin').onclick = () => {
+  const name = document.getElementById('joinName').value.trim();
+  const code = document.getElementById('joinCode').value.trim();
+  const err = document.getElementById('joinError');
+  err.textContent = '';
+  if (!name) return err.textContent = 'Введите имя';
+  if (!/^\d{3}$/.test(code)) return err.textContent = 'Код — 3 цифры';
+
+  socket.emit('joinRoom', { name, code }, (res) => {
+    if (res.error) return err.textContent = res.error;
+    sessionStorage.setItem('selfId', res.selfId);
+    sessionStorage.setItem('code', res.room.code);
+    location.href = 'game.html';
+  });
+};
+</script>
+</body>
+</html>
